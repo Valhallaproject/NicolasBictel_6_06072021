@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');    //import express: node.js web framework
 const bodyParser = require('body-parser');    //import body-parser: parse incoming request bodies in a middleware
 const mongoose = require('mongoose');    //import mongoose
@@ -8,7 +10,7 @@ const sauceRoutes = require('./routes/sauces');
 const userRoutes = require('./routes/user');
 
 //connection to the data base mongoose
-mongoose.connect('mongodb+srv://Nicolas:Nclsbc*1@cluster0.kajxt.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',
+mongoose.connect(process.env.DB_URI,
   { useNewUrlParser: true,
     useUnifiedTopology: true })
     .then(() => console.log('Connexion à MongoDB réussie !'))    //if the connection is successful
