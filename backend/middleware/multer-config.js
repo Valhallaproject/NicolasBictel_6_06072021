@@ -1,11 +1,11 @@
-const multer = require('multer');
+const multer = require('multer');    //import multer package
 
-const MINE_TYPES = {
+const MINE_TYPES = {    //accepted types of images
     'image/jpg' : 'jpg',
     'image/jpeg' : 'jpg',
     'image/png' : 'png'
 };
-
+//Save location and file name
 const storage = multer.diskStorage({
     destination: (req, file, callback) => {
         callback(null, 'images');
