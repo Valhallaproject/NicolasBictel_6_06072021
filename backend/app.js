@@ -4,6 +4,8 @@ const express = require('express');    //import express: node.js web framework
 const bodyParser = require('body-parser');    //import body-parser: parse incoming request bodies in a middleware
 const mongoose = require('mongoose');    //import mongoose
 const path = require('path');    //import path: provides a way of working with directories and file paths.
+const helmet = require('helmet');    //import Helmet, protection against sql and xss injection
+const mongoSanitize = require('express-mongo-sanitize');    //import MongoSanitize, injection protection in Mongo Db
 
 // import the routes for user and sauces from directory "routes"
 const sauceRoutes = require('./routes/sauces');
@@ -24,6 +26,9 @@ app.use((req, res, next) => {
   res.setHeader('Content-Security-Policy', "default-src 'self'");
   next();
 });
+
+app.use(helmet());
+app.use(mongoSanitize());
 
 // routes api
 app.use(bodyParser.json());
