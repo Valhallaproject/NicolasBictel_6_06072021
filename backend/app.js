@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');    //import body-parser: parse incomi
 const mongoose = require('mongoose');    //import mongoose
 const path = require('path');    //import path: provides a way of working with directories and file paths.
 const helmet = require('helmet');    //import Helmet, protection against sql and xss injection
-const mongoSanitize = require('express-mongo-sanitize');    //import MongoSanitize, injection protection in Mongo Db
+const mongoSanitize = require('express-mongo-sanitize');    //middleware which sanitizes user-supplied data to prevent MongoDB Operator Injection
 
 // import the routes for user and sauces from directory "routes"
 const sauceRoutes = require('./routes/sauces');
@@ -28,7 +28,15 @@ app.use((req, res, next) => {
 });
 
 app.use(helmet());
+// To remove data, use:
 app.use(mongoSanitize());
+
+// Or, to replace prohibited characters with _, use:
+app.use(
+  mongoSanitize({
+    replaceWith: '_',
+  }),
+);
 
 // routes api
 app.use(bodyParser.json());
