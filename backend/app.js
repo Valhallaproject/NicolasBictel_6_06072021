@@ -38,6 +38,9 @@ app.use(
   }),
 );
 
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }))
+
 // routes api
 app.use(bodyParser.json());
 app.use('/images', express.static(path.join(__dirname, 'images')));

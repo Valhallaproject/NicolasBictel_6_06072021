@@ -1,16 +1,18 @@
 const User = require('../models/User');
 const bcrypt = require('bcrypt');    //Plugin for hashing the password
 const jwt = require('jsonwebtoken');     //Plugin for token creation
-const sanitize = require("mongo-sanitize");
+const sanitize = require("mongo-sanitize");    //plugin to disinfect entrances against injection attacks
+const cryptojs = require('crypto-js');    //plugin to hide email from database
 
 //creation of a user account
 exports.signup = (req, res, next) => {
     const email = sanitize(req.body.email);
+    const cryptedEmail = cryptojs.HmacSHA256(email, process.env.EMAIL_ENCRYPTION_KEY).toString();
     const password = sanitize(req.body.password);
     bcrypt.hash(password, 10)    //we hash the password
     .then(hash => {
       const user = new User({
-        email: email,    //email backup
+        email: cryptedEmail,    //email backup
         password: hash    //we assign the hash obtained as the value of the password property
       });
       user.save()    //we save the data in the database
@@ -22,8 +24,9 @@ exports.signup = (req, res, next) => {
 //login to a user account
 exports.login = (req, res, next) => {
   const email = sanitize(req.body.email);
+  const cryptedEmail = cryptojs.HmacSHA256(email, process.env.EMAIL_ENCRYPTION_KEY).toString();
   const password = sanitize(req.body.password);
-  User.findOne({ email: email })
+  User.findOne({ email: cryptedEmail })
     .then(user => {
       if (!user) {
         return res.status(401).json({ error: 'Utilisateur non trouvé !' });
@@ -37,7 +40,7 @@ exports.login = (req, res, next) => {
             userId: user._id,
             token: jwt.sign(
               { userId: user._id },
-              'RANDOM_TOKEN_SECRET',
+              process.env.TOKEN,
               { expiresIn: '24h' }
             )
           });
