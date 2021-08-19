@@ -3,12 +3,23 @@ const bcrypt = require('bcrypt');    //Plugin for hashing the password
 const jwt = require('jsonwebtoken');     //Plugin for token creation
 const sanitize = require("mongo-sanitize");    //plugin to disinfect entrances against injection attacks
 const cryptojs = require('crypto-js');    //plugin to hide email from database
+const passwordValidator = require('password-validator');    //plugin to valid password
+
+const schemaPassword = new passwordValidator();
+schemaPassword
+.is().min(8)    //Minimum length: 8 characters                                    
+.is().max(20)    //Maximum length: 20 characters                                 
+.has().uppercase()    //Must have at least one capital letter                              
+.has().lowercase()    //Must have at least one lowercase                              
+.has().digits()    //Must have at least one number
+.has().not().spaces();    //Must not have spaces
 
 //creation of a user account
 exports.signup = (req, res, next) => {
-    const email = sanitize(req.body.email);
-    const cryptedEmail = cryptojs.HmacSHA256(email, process.env.EMAIL_ENCRYPTION_KEY).toString();
-    const password = sanitize(req.body.password);
+  const email = sanitize(req.body.email);
+  const cryptedEmail = cryptojs.HmacSHA256(email, process.env.EMAIL_ENCRYPTION_KEY).toString();
+  const password = sanitize(req.body.password);
+  if(schemaPassword.validate(password)) {
     bcrypt.hash(password, 10)    //we hash the password
     .then(hash => {
       const user = new User({
@@ -20,6 +31,9 @@ exports.signup = (req, res, next) => {
         .catch(error => res.status(400).json({ error }));
     })
     .catch(error => res.status(500).json({ error }));
+  } else {
+    throw 'Le mot de passe doit contenir entre 8 et 20 caractères dont au moins une lettre majuscule, une lettre minusucle, et un chiffre';
+  }
 };
 //login to a user account
 exports.login = (req, res, next) => {
